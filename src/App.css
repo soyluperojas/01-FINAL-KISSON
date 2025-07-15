@@ -1,0 +1,122 @@
+
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em rgba(155, 93, 229, 0.6));
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em rgba(155, 93, 229, 0.6));
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+  border-radius: var(--radius);
+  transition: all 0.3s ease;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+/* Dark theme specific styles */
+.dark .card {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+}
+
+.dark .glass-card {
+  @apply bg-black/10 backdrop-blur-md border border-white/20 rounded-md;
+}
+
+/* Button hover effects */
+button.primary-button {
+  @apply bg-primary hover:bg-primary/90 text-white transition-all;
+}
+
+/* Form element styles */
+.form-input {
+  @apply bg-background border-input focus:border-primary focus:ring-primary/30;
+}
+
+/* Futuristic UI elements */
+.futuristic-card {
+  @apply rounded-md overflow-hidden bg-gradient-to-br from-black/30 to-black/10 backdrop-blur-md border-t border-l border-white/10;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+}
+
+.glow-effect {
+  @apply relative;
+}
+
+.glow-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 15px 2px var(--glow-color);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.glow-effect:hover::after {
+  opacity: 1;
+}
+
+/* Temperature knob animation */
+.knob-rotate {
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.knob-indicator {
+  @apply animate-pulse-glow;
+  --glow-color: rgba(155, 93, 229, 0.7);
+}
+
+/* Card hover animations */
+.shape-card {
+  @apply transition-all duration-300;
+}
+
+.shape-card:hover .shape-icon {
+  @apply animate-bounce-subtle text-primary;
+}
+
+/* Step transition animations */
+.step-enter {
+  @apply animate-slide-in-right;
+}
+
+.step-exit {
+  @apply animate-slide-out-right;
+}
