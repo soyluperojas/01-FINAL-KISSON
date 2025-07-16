@@ -3,17 +3,17 @@ export const flavorOptions = [
   {
     value: "sweet",
     metaphor: "Like dessert after dinner",
-    description: "Sweet preparations with fruits, sugars, and dessert-style ingredients"
+    description: "Sweet with fruits, sugar, and dessert notes."
   },
   {
     value: "balanced", 
     metaphor: "Like a perfect harmony",
-    description: "Balanced approach that can work with both sweet and savory elements"
+    description: "Balanced for sweet or savory."
   },
   {
     value: "savory",
     metaphor: "Like a hearty meal",
-    description: "Savory preparations with herbs, spices, and traditional cooking ingredients"
+    description: "Savory with herbs, spices, and tradition."
   }
 ];
 

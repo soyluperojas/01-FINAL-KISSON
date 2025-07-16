@@ -63,7 +63,7 @@ const TimeSelector = ({ value, onChange }: TimeSelectorProps) => {
               onMouseLeave={() => setHoveredTimeIndex(null)}
               onClick={() => handleTimeClick(i)}
             >
-              <span className="block font-medium text-xs text-white whitespace-pre-line">{marker.label}</span>
+              <span className="block text-[15pt] font-bold text-white whitespace-pre-line">{marker.label}</span>
             </div>
           ))}
         </div>

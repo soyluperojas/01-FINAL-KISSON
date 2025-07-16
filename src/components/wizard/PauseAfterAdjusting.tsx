@@ -16,9 +16,7 @@ const PauseAfterAdjusting = ({ onContinue }: PauseAfterAdjustingProps) => {
   return (
     <div className="fixed inset-0 z-20 bg-[#63B21F] flex items-center justify-center p-[100px] text-center">
       <p className="text-white text-[25pt] font-montserrat leading-relaxed">
-        How intensely should this memory be experienced?
-        <br />
-        Drag the knobs to adjust cooking method, shape, and flavor approach.
+        Adjust how deeply this memory is felt set method, shape, and flavor.
       </p>
     </div>
   );

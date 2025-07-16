@@ -292,7 +292,6 @@ const VoiceInput: React.FC<VoiceInputProps> = ({
   return (
     <div className="voice-input">
       <h2>Voice Input</h2>
-      <p>Click the button and start speaking to record your memory.</p>
       
       <div className="flex flex-col space-y-4">
         {isListening ? (

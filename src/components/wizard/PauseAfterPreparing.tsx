@@ -16,9 +16,9 @@ const PauseAfterPreparing = ({ onContinue }: PauseAfterPreparingProps) => {
   return (
     <div className="fixed inset-0 z-20 bg-[#F73E00] flex items-center justify-center p-[100px] text-center">
       <p className="text-white text-[25pt] font-montserrat leading-relaxed">
-        You've chosen what we're going to cook together.
+        You’ve chosen what we’ll cook.
         <br />
-        Now it's time to prepare the ingredients that will give your story its flavors.
+        Now let’s prepare the ingredients that add flavor to your story.
       </p>
     </div>
   );

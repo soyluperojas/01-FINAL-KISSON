@@ -142,7 +142,7 @@ const IntensitySelection = ({ updateData, data, onSurpriseMe }: IntensitySelecti
     <div className="space-y-6 animate-fade-in text-white">
       <div className="text-center mb-8">
         <p className="text-[25pt] font-bold">
-          Drag the knobs to adjust cooking method, shape, and flavor approach.
+          Adjust the knobs to set method, shape, and flavor.
         </p>
       </div>
 

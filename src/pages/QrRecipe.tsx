@@ -37,7 +37,7 @@ const QrRecipe = () => {
         minHeight: "100vh",
         padding: "1in",
         fontFamily: "Courier, monospace",
-        textAlign: "center",
+        textAlign: "left",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",

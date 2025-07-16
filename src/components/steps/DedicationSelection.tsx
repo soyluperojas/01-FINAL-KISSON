@@ -99,7 +99,7 @@ const DedicationSelection = ({ updateData, data }: DedicationSelectionProps) => 
           htmlFor="dedication-recipient"
           className="text-[15pt] font-montserrat font-bold mb-2 block text-white"
         >
-          Is there anyone specific you would like to dedicate the recipe to?
+          Who would you like to dedicate this recipe to?
         </Label>
         <Input
           id="dedication-recipient"

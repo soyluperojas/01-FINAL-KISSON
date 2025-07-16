@@ -8,9 +8,9 @@ export const getIntensityLabel = (temperature: number) => {
 
 export const getIntensityDescription = (temperature: number) => {
   if (temperature === 0) return "A gentle preparation method with no heat, preserving the raw essence";
-  if (temperature <= 80) return "A soft, subtle approach that slowly releases flavors";
-  if (temperature <= 160) return "A balanced intensity that thoroughly develops the experience";
-  return "A powerful, transformative intensity that creates profound change";
+  if (temperature <= 80) return "A gentle touch that gradually reveals flavors.";
+  if (temperature <= 160) return "A balanced, full-flavored experience.";
+  return "A bold intensity that sparks deep change.";
 };
 
 export const getIntensityColor = (temperature: number) => {

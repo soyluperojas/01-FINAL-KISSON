@@ -54,7 +54,7 @@ const WrittenMemoryInput = ({
   return (
     <div className="space-y-3 mt-3">
       <Textarea 
-        placeholder="Describe your memory here..." 
+        placeholder="" 
         className="min-h-[100px] bg-background/50 border-orange-500/20 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30"
         value={writtenMemory}
         onChange={handleMemoryChange}
@@ -64,6 +64,8 @@ const WrittenMemoryInput = ({
         <p className="text-red-400 text-sm">{error}</p>
       )}
       
+      {/* Elimino el botón y la opción de grabar memoria */}
+      {/*
       {!showVoiceInput ? (
         <Button 
           type="button" 
@@ -88,6 +90,7 @@ const WrittenMemoryInput = ({
           />
         </div>
       )}
+      */}
     </div>
   );
 };

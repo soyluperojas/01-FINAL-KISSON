@@ -16,9 +16,7 @@ const PauseAfterPresentation = ({ onContinue }: PauseAfterPresentationProps) => 
   return (
     <div className="fixed inset-0 z-20 bg-[#000000] flex items-center justify-center p-[100px] text-center">
       <p className="text-white text-[25pt] font-montserrat leading-relaxed">
-        Your dish is almost ready.
-        <br />
-        It has been created with memory, emotion, and care.
+        Your dish is nearly ready crafted with memory, emotion, and care
       </p>
     </div>
   );

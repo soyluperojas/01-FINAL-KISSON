@@ -11,7 +11,7 @@ const Step5Video = ({ onContinue }: Step5VideoProps) => {
 
   useEffect(() => {
     const textTimeout = setTimeout(() => setShowText(false), 1000); // Oculta el texto tras 1 segundo
-    const videoTimeout = setTimeout(() => onContinue(), 3000); // Pasa al siguiente paso tras 3 segundos
+    const videoTimeout = setTimeout(() => onContinue(), 2000); // Pasa al siguiente paso tras 3 segundos
 
     const video = videoRef.current;
     const handleEnded = () => {
@@ -42,13 +42,32 @@ const Step5Video = ({ onContinue }: Step5VideoProps) => {
         playsInline
       />
       {showText && (
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <p
-            className="text-white text-[25pt] font-bold uppercase font-sans text-center"
-            style={{ fontFamily: "Montserrat, sans-serif" }}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            pointerEvents: 'none',
+            zIndex: 10
+          }}
+        >
+          <span
+            style={{
+              color: 'white',
+              fontWeight: 'bold',
+              fontSize: '35pt',
+              textAlign: 'center',
+              fontFamily: 'Montserrat, sans-serif',
+              textTransform: 'none',
+            }}
           >
-            STEP 5 COMPLETED
-          </p>
+            STEP 5 <span style={{ textTransform: 'lowercase' }}>completed</span>
+          </span>
         </div>
       )}
     </div>

@@ -77,7 +77,7 @@ export const ThermalLabelPrint = ({ recipeData, shareableUrl, recipeTitle }: The
       </div>
 
       {/* Description */}
-      <div style={{ fontSize: '9pt', lineHeight: '1.1' }}>
+      <div style={{ fontSize: '9pt', lineHeight: '1.1', textAlign: 'left', width: '100%' }}>
         <p style={{ margin: 0 }}>
           A memory recipe inspired by {recipeData.memoryType} moments
         </p>

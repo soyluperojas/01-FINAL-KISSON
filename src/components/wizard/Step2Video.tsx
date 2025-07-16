@@ -1,5 +1,5 @@
 // src/components/transitions/Step2Video.tsx
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Step2VideoProps {
   onContinue: () => void;
@@ -7,11 +7,14 @@ interface Step2VideoProps {
 
 const Step2Video = ({ onContinue }: Step2VideoProps) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [showStepText, setShowStepText] = useState(true);
 
   useEffect(() => {
+    // Mostrar el texto solo durante 1 segundo
+    const textTimeout = setTimeout(() => setShowStepText(false), 1000);
     const timeout = setTimeout(() => {
       onContinue();
-    }, 3000); // 3 segundos
+    }, 2000); // 3 segundos
 
     const handleEnded = () => {
       clearTimeout(timeout);
@@ -27,6 +30,7 @@ const Step2Video = ({ onContinue }: Step2VideoProps) => {
     }
 
     return () => {
+      clearTimeout(textTimeout);
       clearTimeout(timeout);
       video?.removeEventListener("ended", handleEnded);
     };
@@ -42,11 +46,35 @@ const Step2Video = ({ onContinue }: Step2VideoProps) => {
         muted
         playsInline
       />
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-        <p className="text-white text-[25pt] font-normal uppercase font-sans text-center" style={{ fontFamily: "Montserrat, sans-serif" }}>
-          STEP 2 COMPLETED
-        </p>
-      </div>
+      {showStepText && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            pointerEvents: 'none',
+            zIndex: 10
+          }}
+        >
+          <span
+            style={{
+              color: 'white',
+              fontWeight: 'bold',
+              fontSize: '35pt',
+              textAlign: 'center',
+              fontFamily: 'Montserrat, sans-serif',
+              textTransform: 'none',
+            }}
+          >
+            STEP 2 <span style={{ textTransform: 'lowercase' }}>completed</span>
+          </span>
+        </div>
+      )}
     </div>
   );
 };

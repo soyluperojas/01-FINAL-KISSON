@@ -154,7 +154,7 @@ const ResultDisplay = ({ data, onFinish }: ResultDisplayProps) => {
       <div className="text-center mb-6 no-print">
         <h2 className="font-display text-white text-5xl font-extrabold">Your Memory Recipe</h2>
         <p className="text-muted-foreground text-white/80 text-2xl font-extrabold">
-          The recipe is ready. Let the dish speak quietly... and may those who receive it truly feel its meaning.
+          The recipe is ready, may its quiet voice be deeply felt.
         </p>
       </div>
 
@@ -204,6 +204,11 @@ const ResultDisplay = ({ data, onFinish }: ResultDisplayProps) => {
           )}
 
           <div className="text-center no-print mt-8">
+            {!preloadReady && !isSubmitting && (
+              <div className="mb-2">
+                <span className="text-xs text-white/80">Just a sec—your memory’s finding its form!</span>
+              </div>
+            )}
             <button
               onClick={handlePlayVideo}
               disabled={!isRecipeComplete() || isSubmitting}

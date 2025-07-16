@@ -30,7 +30,7 @@ export const SpiceCondimentInput = ({ value, onChange }: SpiceCondimentInputProp
           htmlFor="spice-condiment"
           className="text-[15pt] font-bold text-white mb-2 block"
         >
-          What spice or condiment would enhance this experience?
+          What spice would elevate this experience?
         </Label>
         <Input
           id="spice-condiment"
@@ -42,9 +42,6 @@ export const SpiceCondimentInput = ({ value, onChange }: SpiceCondimentInputProp
         {error && (
           <p className="text-red-400 text-sm mt-1">{error}</p>
         )}
-        <p className="text-sm text-white/75 mt-1">
-          This will add the final touch of flavor to your memory recipe
-        </p>
       </div>
     </div>
   );
