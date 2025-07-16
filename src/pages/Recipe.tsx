@@ -41,7 +41,13 @@ const Recipe = () => {
         const encodedData = searchParams.get('data');
         console.log("Encoded data from URL:", encodedData ? "present" : "not present");
         
-        const parsedData = await getRecipeWithFallback(id, encodedData || undefined);
+        // Add timeout for better UX
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout')), 10000)
+        );
+        
+        const recipePromise = getRecipeWithFallback(id, encodedData || undefined);
+        const parsedData = await Promise.race([recipePromise, timeoutPromise]) as ExtendedRecipeData | null;
         
         if (!parsedData) {
           setError("Recipe not found or expired");
@@ -55,7 +61,7 @@ const Recipe = () => {
         setIsLoading(false);
       } catch (err) {
         console.error("Error loading recipe:", err);
-        setError("Failed to load recipe");
+        setError("Failed to load recipe - please try again");
         setIsLoading(false);
       }
     };

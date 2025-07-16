@@ -9,6 +9,12 @@ import { getStoredRecipes, saveRecipesToStorage } from "./localStorage";
 const KV_URL = import.meta.env.VITE_KV_REST_API_URL || import.meta.env.KV_REST_API_URL;
 const KV_TOKEN = import.meta.env.VITE_KV_REST_API_TOKEN || import.meta.env.KV_REST_API_TOKEN;
 
+// Debug variables de entorno
+console.log("🔧 KV_URL disponible:", !!KV_URL);
+console.log("🔧 KV_TOKEN disponible:", !!KV_TOKEN);
+console.log("🔧 VITE_KV_REST_API_URL:", import.meta.env.VITE_KV_REST_API_URL);
+console.log("🔧 KV_REST_API_URL:", import.meta.env.KV_REST_API_URL);
+
 async function saveToKV(id: string, recipe: ExtendedRecipeData) {
   try {
     console.log("🔄 Intentando guardar en KV con URL:", KV_URL);
