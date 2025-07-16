@@ -1,10 +1,64 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { SecurityAuditLogger } from "@/utils/securityAudit";
 import { InputSanitizer } from "@/utils/inputSanitizer";
 import { ExtendedRecipeData } from "./types";
 import { validateImageUrl } from "./validation";
 import { getStoredRecipes, saveRecipesToStorage } from "./localStorage";
+
+// 🔗 Conexión con Vercel KV
+const KV_URL = import.meta.env.VITE_KV_REST_API_URL || import.meta.env.KV_REST_API_URL;
+const KV_TOKEN = import.meta.env.VITE_KV_REST_API_TOKEN || import.meta.env.KV_REST_API_TOKEN;
+
+async function saveToKV(id: string, recipe: ExtendedRecipeData) {
+  try {
+    console.log("🔄 Intentando guardar en KV con URL:", KV_URL);
+    const response = await fetch(`${KV_URL}/set/recipe-${id}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${KV_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(recipe),
+    });
+    
+    if (response.ok) {
+      console.log("✅ Guardado en KV exitosamente");
+    } else {
+      console.error("❌ Error en respuesta KV:", response.status, response.statusText);
+    }
+  } catch (err) {
+    console.error("❌ Error guardando en KV:", err);
+  }
+}
+
+async function getFromKV(id: string): Promise<ExtendedRecipeData | null> {
+  try {
+    console.log("🔄 Intentando leer desde KV con URL:", KV_URL);
+    const res = await fetch(`${KV_URL}/get/recipe-${id}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${KV_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+    });
+    
+    if (!res.ok) {
+      console.error("❌ Error en respuesta KV:", res.status, res.statusText);
+      return null;
+    }
+    
+    const json = await res.json();
+    if (json.result) {
+      console.log("✅ Obtenido desde KV exitosamente");
+      return JSON.parse(json.result);
+    } else {
+      console.log("⚠️ No se encontró resultado en KV");
+    }
+  } catch (err) {
+    console.error("❌ Error leyendo desde KV:", err);
+  }
+  return null;
+}
 
 export const generateRecipeId = (): string => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -14,68 +68,61 @@ export const generateRecipeId = (): string => {
   });
 };
 
-export const storeRecipe = async (recipeData: ExtendedRecipeData, imageUrl?: string, providedId?: string): Promise<string> => {
+export const storeRecipe = async (
+  recipeData: ExtendedRecipeData,
+  imageUrl?: string,
+  providedId?: string
+): Promise<string> => {
   const id = providedId || generateRecipeId();
   console.log("=== STORE RECIPE DEBUG (PUBLIC MODE) ===");
   console.log("Storing recipe with ID:", id);
   console.log("Raw image URL:", imageUrl);
-  
-  // Sanitize recipe data
+
   const sanitizedRecipeData = InputSanitizer.sanitizeRecipeData(recipeData);
-  
-  // Validate and clean the image URL
   const cleanImageUrl = validateImageUrl(imageUrl);
-  console.log("Cleaned image URL:", cleanImageUrl);
-  
+  if (cleanImageUrl) {
+    sanitizedRecipeData.storedImageUrl = cleanImageUrl;
+  }
+
   try {
-    // For public mode, we primarily use localStorage but can still try database for read-only recipes
-    console.log("Public mode: storing in localStorage");
+    // 1. Guardar localmente
     const recipes = getStoredRecipes();
-    if (cleanImageUrl) {
-      sanitizedRecipeData.storedImageUrl = cleanImageUrl;
-    }
     recipes.set(id, sanitizedRecipeData);
     saveRecipesToStorage(recipes);
-    console.log("Stored recipe in localStorage (public mode)");
-    
-    // Log the action for audit
+    console.log("✅ Guardado en localStorage");
+
+    // 2. Guardar en KV
+    await saveToKV(id, sanitizedRecipeData);
+
+    // 3. Auditar
     await SecurityAuditLogger.logRecipeAction('create', id);
   } catch (error) {
-    console.error("Error with storage operation:", error);
-    // Still try to save to localStorage as fallback
-    const recipes = getStoredRecipes();
-    if (cleanImageUrl) {
-      sanitizedRecipeData.storedImageUrl = cleanImageUrl;
-    }
-    recipes.set(id, sanitizedRecipeData);
-    saveRecipesToStorage(recipes);
-    console.log("Stored recipe in localStorage as fallback");
+    console.error("❌ Error con almacenamiento:", error);
   }
-  
+
   return id;
 };
 
 export const getRecipe = async (id: string): Promise<ExtendedRecipeData | null> => {
   console.log("=== GET RECIPE DEBUG (PUBLIC MODE) ===");
   console.log("Retrieving recipe with ID:", id);
-  
-  // Validate ID format to prevent injection
+
   if (!id || typeof id !== 'string' || id.length > 100) {
-    console.error("Invalid recipe ID format");
+    console.error("❌ ID inválido");
     return null;
   }
-  
+
   try {
-    // First try localStorage for public mode
+    // 1. LocalStorage
     const recipes = getStoredRecipes();
     const localRecipe = recipes.get(id);
     if (localRecipe) {
-      console.log("Retrieved recipe from localStorage (public mode)");
+      console.log("✅ Encontrada en localStorage");
       await SecurityAuditLogger.logRecipeAction('view', id);
       return localRecipe;
     }
 
-    // Try to get from database for shared recipes (public read access)
+    // 2. Supabase
     const { data, error } = await supabase
       .from('recipes')
       .select('*')
@@ -83,28 +130,25 @@ export const getRecipe = async (id: string): Promise<ExtendedRecipeData | null> 
       .single();
 
     if (!error && data) {
-      console.log("Retrieved shared recipe from database");
-      console.log("Image URL from database:", data.image_url);
-      
-      const recipeData = data.recipe_data as unknown as ExtendedRecipeData;
-      
-      // Set the stored image URL from the database
-      if (data.image_url) {
-        recipeData.storedImageUrl = data.image_url;
-      }
-      
-      // Sanitize data from database
-      const sanitizedRecipe = InputSanitizer.sanitizeRecipeData(recipeData);
-      
-      // Log recipe view for audit
+      console.log("✅ Encontrada en Supabase");
+      const recipeData = InputSanitizer.sanitizeRecipeData(data.recipe_data);
+      if (data.image_url) recipeData.storedImageUrl = data.image_url;
+      const sanitized = InputSanitizer.sanitizeRecipeData(recipeData);
       await SecurityAuditLogger.logRecipeAction('view', id);
-      
-      return sanitizedRecipe;
-    } else {
-      console.log("Recipe not found:", error?.message);
+      return sanitized;
     }
+
+    // 3. Vercel KV
+    const kvRecipe = await getFromKV(id);
+    if (kvRecipe) {
+      console.log("✅ Encontrada en KV");
+      await SecurityAuditLogger.logRecipeAction('view', id);
+      return InputSanitizer.sanitizeRecipeData(kvRecipe);
+    }
+
+    console.warn("⚠️ Receta no encontrada");
   } catch (error) {
-    console.error("Error retrieving recipe:", error);
+    console.error("❌ Error al obtener receta:", error);
   }
 
   return null;
@@ -114,64 +158,51 @@ export const updateRecipeImage = async (id: string, imageUrl: string): Promise<b
   console.log("=== UPDATE RECIPE IMAGE DEBUG (PUBLIC MODE) ===");
   console.log("Updating recipe image for ID:", id);
   console.log("New image URL:", imageUrl);
-  
+
   const cleanImageUrl = validateImageUrl(imageUrl);
-  
   if (!cleanImageUrl) {
-    console.error("Invalid image URL provided for update:", imageUrl);
+    console.error("❌ URL de imagen inválida:", imageUrl);
     return false;
   }
-  
+
   try {
-    // For public mode, update localStorage
     const recipes = getStoredRecipes();
     const recipe = recipes.get(id);
     if (recipe) {
       recipe.storedImageUrl = cleanImageUrl;
       recipes.set(id, recipe);
       saveRecipesToStorage(recipes);
-      console.log("Updated recipe image in localStorage (public mode)");
+      console.log("✅ Imagen actualizada en localStorage");
       await SecurityAuditLogger.logRecipeAction('update', id);
       return true;
     }
-    
-    return false;
   } catch (error) {
-    console.error("Error updating recipe image:", error);
-    return false;
+    console.error("❌ Error actualizando imagen:", error);
   }
+
+  return false;
 };
 
 export const getRecipeWithFallback = async (id: string, encodedData?: string): Promise<ExtendedRecipeData | null> => {
-  // Try to get from storage first
   let recipe = await getRecipe(id);
-  
+
   if (!recipe && encodedData) {
-    console.log("Recipe not found in storage, trying URL fallback data");
+    console.log("🔍 Intentando decodificar receta desde URL");
     try {
       const jsonString = decodeURIComponent(escape(atob(encodedData)));
       const rawRecipe = JSON.parse(jsonString);
-      
-      // Sanitize the decoded recipe
       recipe = InputSanitizer.sanitizeRecipeData(rawRecipe);
-      console.log("Successfully decoded and sanitized recipe from URL");
-      
-      // Store it for future use in localStorage
       if (recipe) {
-        try {
-          const recipes = getStoredRecipes();
-          recipes.set(id, recipe);
-          saveRecipesToStorage(recipes);
-          console.log("Stored decoded recipe in localStorage (public mode)");
-          await SecurityAuditLogger.logRecipeAction('create', id);
-        } catch (error) {
-          console.error("Failed to store decoded recipe:", error);
-        }
+        const recipes = getStoredRecipes();
+        recipes.set(id, recipe);
+        saveRecipesToStorage(recipes);
+        await SecurityAuditLogger.logRecipeAction('create', id);
+        console.log("✅ Receta decodificada y guardada desde fallback");
       }
     } catch (error) {
-      console.error("Failed to decode recipe from URL:", error);
+      console.error("❌ Error al decodificar receta desde fallback:", error);
     }
   }
-  
+
   return recipe;
 };
