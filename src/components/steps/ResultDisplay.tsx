@@ -49,6 +49,21 @@ const ResultDisplay = ({ data, onFinish }: ResultDisplayProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [preloadReady, setPreloadReady] = useState(false);
 
+  // Generate QR URL with recipe data included
+  const generateQrUrl = () => {
+    if (recipeTitle && cookingRecipe && poeticIngredients.length > 0 && memoryDescription) {
+      const recipeData = {
+        recipeTitle,
+        cookingRecipe,
+        videoName: selectedVideoName || "1-organic-a.mp4" // fallback video
+      };
+      const encodedData = encodeURIComponent(JSON.stringify(recipeData));
+      return `${window.location.origin}/qr-view/${recipeId}?data=${encodedData}`;
+    }
+    return `${window.location.origin}/qr-view/${recipeId}`;
+  };
+
+  // Regresar a la URL corta para el QR
   const qrUrl = `${window.location.origin}/qr-view/${recipeId}`;
 
   useEffect(() => {
@@ -107,7 +122,16 @@ const ResultDisplay = ({ data, onFinish }: ResultDisplayProps) => {
       url: qrUrl
     };
 
+    // Store in localStorage for same-device access
     localStorage.setItem(`recipe-${recipeId}`, JSON.stringify(fullRecipe));
+    
+    // Also store the QR-specific data for cross-device access
+    const qrRecipeData = {
+      recipeTitle,
+      cookingRecipe,
+      videoName: `${selectedVideo}.mp4`
+    };
+    localStorage.setItem(recipeId, JSON.stringify(qrRecipeData));
 
     setShowPreview(true);
 

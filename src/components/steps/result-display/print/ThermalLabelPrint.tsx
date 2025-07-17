@@ -53,27 +53,55 @@ export const ThermalLabelPrint = ({ recipeData, shareableUrl, recipeTitle }: The
 
       {/* QR Code */}
       <div style={{ marginBottom: '0.2in' /* espacio más corto */ }}>
-        <img 
-          src={`https://api.qrserver.com/v1/create-qr-code/?size=138x138&data=${encodeURIComponent(shareableUrl)}`}
-          alt="Recipe QR Code"
-          style={{ 
+        {shareableUrl && shareableUrl.length < 1800 ? (
+          <img 
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=138x138&data=${encodeURIComponent(shareableUrl)}`}
+            alt="Recipe QR Code"
+            style={{ 
+              width: '1.38in',
+              height: '1.38in',
+              display: 'block',
+              margin: '0 auto'
+            }}
+            onError={(e) => {
+              const fallbackUrl = `https://chart.googleapis.com/chart?chs=138x138&cht=qr&chl=${encodeURIComponent(shareableUrl)}`;
+              (e.target as HTMLImageElement).src = fallbackUrl;
+            }}
+          />
+        ) : (
+          <div style={{
             width: '1.38in',
             height: '1.38in',
-            display: 'block',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#eee',
+            color: '#333',
+            fontSize: '10pt',
+            border: '1px solid #ccc',
+            borderRadius: '8px',
             margin: '0 auto'
-          }}
-          onError={(e) => {
-            const fallbackUrl = `https://chart.googleapis.com/chart?chs=138x138&cht=qr&chl=${encodeURIComponent(shareableUrl)}`;
-            (e.target as HTMLImageElement).src = fallbackUrl;
-          }}
-        />
+          }}>
+            QR not available<br />
+            (URL too long)
+          </div>
+        )}
         <p style={{ 
           fontSize: '8pt', 
           marginTop: '4px', 
-          color: '#666'
+          color: '#666',
+          wordBreak: 'break-all',
+          maxWidth: '1.38in',
+          margin: '0 auto',
         }}>
           Scan for full recipe
         </p>
+        {/* Mostrar la URL como texto si el QR no se puede generar */}
+        {(!shareableUrl || shareableUrl.length >= 1800) && (
+          <div style={{ fontSize: '7pt', color: '#999', marginTop: 8, wordBreak: 'break-all', maxWidth: '1.38in', margin: '0 auto' }}>
+            {shareableUrl}
+          </div>
+        )}
       </div>
 
       {/* Description */}
