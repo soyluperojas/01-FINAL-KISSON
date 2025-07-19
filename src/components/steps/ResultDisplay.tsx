@@ -102,7 +102,7 @@ const ResultDisplay = ({ data, onFinish }: ResultDisplayProps) => {
     };
 
     const videoBank: Record<string, string[]> = {
-      organic: ["a", "b", "c", "d"],
+      organic: ["a", "b", "c"],
       bundle: ["a", "b", "c", "d"],
       triangle: ["a", "b"],
       oval: ["a", "b", "c", "d", "e", "f"],
@@ -117,6 +117,13 @@ const ResultDisplay = ({ data, onFinish }: ResultDisplayProps) => {
     const selectedVideo = shapeValue === "surprise"
       ? `${Math.floor(Math.random() * 6) + 1}-${"organic"}-a`
       : `${prefix}-${shapeValue}-${randomLetter}`;
+
+    console.log("🎬 Video seleccionado:", selectedVideo);
+    console.log("🎬 Shape value:", shapeValue);
+    console.log("🎬 Time value:", timeValue);
+    console.log("🎬 Is past/present:", isPastOrPresent);
+    console.log("🎬 Prefix:", prefix);
+    console.log("🎬 Random letter:", randomLetter);
 
     setSelectedVideoName(`${selectedVideo}.mp4`);
     const storedImageUrl = `/images/${selectedVideo}.png`;
@@ -155,7 +162,10 @@ const ResultDisplay = ({ data, onFinish }: ResultDisplayProps) => {
           autoplay 
           loop 
           muted 
-          style="margin:0;max-width:100%;max-height:100%;display:flex;justify-content:center;align-items:center;height:100vh;background:#000" 
+          style="margin:0;max-width:100%;max-height:100%;display:flex;justify-content:center;align-items:center;height:100vh;background:#000"
+          onerror="console.error('❌ Error cargando video:', this.src); this.style.display='none'; document.body.innerHTML='<div style=\\"color:white;text-align:center;padding:20px;\\">Video no encontrado: ${selectedVideo}.mp4</div>';"
+          onloadstart="console.log('🎬 Iniciando carga del video:', this.src);"
+          oncanplay="console.log('✅ Video listo para reproducir:', this.src);"
         ></video>
       `;
       
