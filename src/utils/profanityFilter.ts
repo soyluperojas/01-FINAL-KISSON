@@ -19,7 +19,7 @@ const inappropriateWords = [
 
 // Rate limiting for public users
 const RATE_LIMIT_STORAGE_KEY = 'input_rate_limit';
-const MAX_INPUTS_PER_MINUTE = 10;
+const MAX_INPUTS_PER_MINUTE = 9999;
 const RATE_LIMIT_WINDOW = 60000; // 1 minute
 
 // Result interface for validation
