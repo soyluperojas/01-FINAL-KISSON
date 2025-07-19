@@ -84,14 +84,13 @@ const ResultDisplay = ({ data, onFinish }: ResultDisplayProps) => {
       console.warn("❌ La receta no está completa o estás enviando muy rápido.");
       return;
     }
-
+  
     setIsSubmitting(true);
-
+  
     const shapeValue = data.shape?.value || "surprise";
     const timeValue = data.serveTime?.toLowerCase() || "present";
-
     const isPastOrPresent = ["distant past", "recent past", "present"].includes(timeValue);
-
+  
     const shapeMap: Record<string, number> = {
       organic: 1,
       bundle: 2,
@@ -100,34 +99,55 @@ const ResultDisplay = ({ data, onFinish }: ResultDisplayProps) => {
       star: 5,
       envelope: 6
     };
-
-    const videoBank: Record<string, string[]> = {
-      organic: ["a", "b", "c"],
-      bundle: ["a", "b", "c", "d"],
-      triangle: ["a", "b"],
-      oval: ["a", "b", "c", "d", "e", "f"],
-      star: ["a", "b", "c", "d"],
-      envelope: ["a", "b", "c", "d", "e", "f"]
+  
+    // Limitar letras para casos específicos
+    const videoBank: Record<string, { past: string[]; future: string[] }> = {
+      organic: {
+        past: ["a", "b", "c"],
+        future: ["a", "b", "c"]
+      },
+      bundle: {
+        past: ["a", "b", "c", "d"],
+        future: ["a", "b", "c", "d"]
+      },
+      triangle: {
+        past: ["a"], // solo a disponible
+        future: ["a", "b"]
+      },
+      oval: {
+        past: ["a", "b", "c", "d", "e", "f"],
+        future: ["a", "b", "c", "d", "e", "f"]
+      },
+      star: {
+        past: ["a", "b", "c", "d"],
+        future: ["a", "b", "c", "d"]
+      },
+      envelope: {
+        past: ["a", "b", "c", "d", "e", "f"],
+        future: ["a", "b", "c", "d", "e", "f"]
+      }
     };
-
+  
     const shapeNumber = shapeMap[shapeValue] || 1;
-    const letterPool = videoBank[shapeValue] || ["a"];
-    const randomLetter = letterPool[Math.floor(Math.random() * letterPool.length)];
     const prefix = isPastOrPresent ? `${shapeNumber}0` : `${shapeNumber}`;
-    const selectedVideo = shapeValue === "surprise"
-      ? `${Math.floor(Math.random() * 6) + 1}-${"organic"}-a`
-      : `${prefix}-${shapeValue}-${randomLetter}`;
-
-    console.log("🎬 Video seleccionado:", selectedVideo);
-    console.log("🎬 Shape value:", shapeValue);
-    console.log("🎬 Time value:", timeValue);
-    console.log("🎬 Is past/present:", isPastOrPresent);
-    console.log("🎬 Prefix:", prefix);
-    console.log("🎬 Random letter:", randomLetter);
-
+    const availableLetters =
+      shapeValue === "surprise"
+        ? ["a"]
+        : isPastOrPresent
+        ? videoBank[shapeValue]?.past || ["a"]
+        : videoBank[shapeValue]?.future || ["a"];
+  
+    const randomLetter =
+      availableLetters[Math.floor(Math.random() * availableLetters.length)];
+  
+    const selectedVideo =
+      shapeValue === "surprise"
+        ? `${Math.floor(Math.random() * 6) + 1}-organic-a`
+        : `${prefix}-${shapeValue}-${randomLetter}`;
+  
     setSelectedVideoName(`${selectedVideo}.mp4`);
     const storedImageUrl = `/images/${selectedVideo}.png`;
-
+  
     const fullRecipe = {
       id: recipeId,
       title: recipeTitle,
@@ -138,23 +158,26 @@ const ResultDisplay = ({ data, onFinish }: ResultDisplayProps) => {
       image: storedImageUrl,
       url: qrUrl
     };
-
+  
     localStorage.setItem(`recipe-${recipeId}`, JSON.stringify(fullRecipe));
-    localStorage.setItem(recipeId, JSON.stringify({
-      recipeTitle,
-      cookingRecipe,
-      videoName: `${selectedVideo}.mp4`
-    }));
-
+    localStorage.setItem(
+      recipeId,
+      JSON.stringify({
+        recipeTitle,
+        cookingRecipe,
+        videoName: `${selectedVideo}.mp4`
+      })
+    );
+  
     setShowPreview(true);
-
+  
     let popup = videoWindow;
-
+  
     if (!popup || popup.closed) {
       popup = window.open("", "VideoWindow", `width=800,height=800`);
       setVideoWindow(popup);
     }
-    
+  
     if (popup) {
       popup.document.body.innerHTML = `
         <video 
@@ -162,17 +185,13 @@ const ResultDisplay = ({ data, onFinish }: ResultDisplayProps) => {
           autoplay 
           loop 
           muted 
-          style="margin:0;max-width:100%;max-height:100%;display:flex;justify-content:center;align-items:center;height:100vh;background:#000"
-          onerror="console.error('❌ Error cargando video:', this.src); this.style.display='none'; document.body.innerHTML='<div style=\\"color:white;text-align:center;padding:20px;\\">Video no encontrado: ${selectedVideo}.mp4</div>';"
-          onloadstart="console.log('🎬 Iniciando carga del video:', this.src);"
-          oncanplay="console.log('✅ Video listo para reproducir:', this.src);"
+          style="margin:0;max-width:100%;max-height:100%;display:flex;justify-content:center;align-items:center;height:100vh;background:#000" 
         ></video>
       `;
-      
     }
-
+  
     setTimeout(() => setIsSubmitting(false), 3000);
-  };
+  };  
 
   const extendedData: ExtendedRecipeData = {
     ...data,

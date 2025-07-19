@@ -54,20 +54,20 @@ export const ThermalLabelPrint = ({ recipeData, shareableUrl, recipeTitle }: The
       {/* QR Code */}
       <div style={{ marginBottom: '0.2in' /* espacio más corto */ }}>
         {shareableUrl && shareableUrl.length < 1800 ? (
-          <img 
-            src={`https://api.qrserver.com/v1/create-qr-code/?size=138x138&data=${encodeURIComponent(shareableUrl)}`}
-            alt="Recipe QR Code"
-            style={{ 
-              width: '1.38in',
-              height: '1.38in',
-              display: 'block',
-              margin: '0 auto'
-            }}
-            onError={(e) => {
-              const fallbackUrl = `https://chart.googleapis.com/chart?chs=138x138&cht=qr&chl=${encodeURIComponent(shareableUrl)}`;
-              (e.target as HTMLImageElement).src = fallbackUrl;
-            }}
-          />
+        <img 
+          src={`https://api.qrserver.com/v1/create-qr-code/?size=138x138&data=${encodeURIComponent(shareableUrl)}`}
+          alt="Recipe QR Code"
+          style={{ 
+            width: '1.38in',
+            height: '1.38in',
+            display: 'block',
+            margin: '0 auto'
+          }}
+          onError={(e) => {
+            const fallbackUrl = `https://chart.googleapis.com/chart?chs=138x138&cht=qr&chl=${encodeURIComponent(shareableUrl)}`;
+            (e.target as HTMLImageElement).src = fallbackUrl;
+          }}
+        />
         ) : (
           <div style={{
             width: '1.38in',

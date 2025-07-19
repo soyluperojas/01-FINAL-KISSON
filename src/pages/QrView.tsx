@@ -33,10 +33,10 @@ const QrRecipe = () => {
 
       // Fallback: intentar localStorage (solo para el mismo dispositivo)
       try {
-        const stored = localStorage.getItem(id);
-        if (stored) {
-          const parsed = JSON.parse(stored) as RecipeQRData;
-          setData(parsed);
+      const stored = localStorage.getItem(id);
+      if (stored) {
+        const parsed = JSON.parse(stored) as RecipeQRData;
+        setData(parsed);
           setIsLoading(false);
           return;
         }
@@ -64,8 +64,8 @@ const QrRecipe = () => {
             margin: "0 auto 20px"
           }}></div>
           <h1 style={{ fontFamily: "Courier", fontSize: 24, marginBottom: 10 }}>
-            Loading recipe...
-          </h1>
+          Loading recipe...
+        </h1>
           <p style={{ fontSize: 14, opacity: 0.7 }}>
             This may take a few seconds
           </p>
