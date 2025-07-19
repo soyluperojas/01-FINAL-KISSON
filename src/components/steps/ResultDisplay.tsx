@@ -1,3 +1,5 @@
+// ResultDisplay.tsx
+
 import { useEffect, useState } from "react";
 import { RecipeData } from "../RecipeWizard";
 
@@ -49,13 +51,12 @@ const ResultDisplay = ({ data, onFinish }: ResultDisplayProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [preloadReady, setPreloadReady] = useState(false);
 
-  // Generate QR URL with recipe data included
   const generateQrUrl = () => {
     if (recipeTitle && cookingRecipe && poeticIngredients.length > 0 && memoryDescription) {
       const recipeData = {
         recipeTitle,
         cookingRecipe,
-        videoName: selectedVideoName || "1-organic-a.mp4" // fallback video
+        videoName: selectedVideoName || "1-organic-a.mp4"
       };
       const encodedData = encodeURIComponent(JSON.stringify(recipeData));
       return `${window.location.origin}/qr-view/${recipeId}?data=${encodedData}`;
@@ -63,7 +64,6 @@ const ResultDisplay = ({ data, onFinish }: ResultDisplayProps) => {
     return `${window.location.origin}/qr-view/${recipeId}`;
   };
 
-  // Regresar a la URL corta para el QR
   const qrUrl = `${window.location.origin}/qr-view/${recipeId}`;
 
   useEffect(() => {
@@ -77,9 +77,7 @@ const ResultDisplay = ({ data, onFinish }: ResultDisplayProps) => {
     }
   }, [recipeTitle, cookingRecipe, poeticIngredients, memoryDescription]);
 
-  const isRecipeComplete = () => {
-    return preloadReady;
-  };
+  const isRecipeComplete = () => preloadReady;
 
   const handlePlayVideo = () => {
     if (!isRecipeComplete() || isSubmitting) {
@@ -90,25 +88,37 @@ const ResultDisplay = ({ data, onFinish }: ResultDisplayProps) => {
     setIsSubmitting(true);
 
     const shapeValue = data.shape?.value || "surprise";
+    const timeValue = data.serveTime?.toLowerCase() || "present";
 
-    const videoBank: Record<string, string[]> = {
-      organic: ["1-organic-a", "1-organic-b"],
-      bundle: ["2-bundle-a", "2-bundle-b", "2-bundle-c", "2-bundle-d"],
-      triangle: ["3-triangle-a", "3-triangle-b"],
-      oval: ["4-oval-a", "4-oval-b", "4-oval-c"],
-      star: ["5-star-a"],
-      envelope: ["6-envelope-a", "6-envelope-b", "6-envelope-c"]
+    const isPastOrPresent = ["distant past", "recent past", "present"].includes(timeValue);
+
+    const shapeMap: Record<string, number> = {
+      organic: 1,
+      bundle: 2,
+      triangle: 3,
+      oval: 4,
+      star: 5,
+      envelope: 6
     };
 
-    const surprisePool = Object.values(videoBank).flat();
+    const videoBank: Record<string, string[]> = {
+      organic: ["a", "b", "c", "d"],
+      bundle: ["a", "b", "c", "d"],
+      triangle: ["a", "b"],
+      oval: ["a", "b", "c", "d", "e", "f"],
+      star: ["a", "b", "c", "d"],
+      envelope: ["a", "b", "c", "d", "e", "f"]
+    };
 
-    const selectedVideo =
-      shapeValue === "surprise" || !videoBank[shapeValue]
-        ? surprisePool[Math.floor(Math.random() * surprisePool.length)]
-        : videoBank[shapeValue][Math.floor(Math.random() * videoBank[shapeValue].length)];
+    const shapeNumber = shapeMap[shapeValue] || 1;
+    const letterPool = videoBank[shapeValue] || ["a"];
+    const randomLetter = letterPool[Math.floor(Math.random() * letterPool.length)];
+    const prefix = isPastOrPresent ? `${shapeNumber}0` : `${shapeNumber}`;
+    const selectedVideo = shapeValue === "surprise"
+      ? `${Math.floor(Math.random() * 6) + 1}-${"organic"}-a`
+      : `${prefix}-${shapeValue}-${randomLetter}`;
 
     setSelectedVideoName(`${selectedVideo}.mp4`);
-
     const storedImageUrl = `/images/${selectedVideo}.png`;
 
     const fullRecipe = {
@@ -122,40 +132,33 @@ const ResultDisplay = ({ data, onFinish }: ResultDisplayProps) => {
       url: qrUrl
     };
 
-    // Store in localStorage for same-device access
     localStorage.setItem(`recipe-${recipeId}`, JSON.stringify(fullRecipe));
-    
-    // Also store the QR-specific data for cross-device access
-    const qrRecipeData = {
+    localStorage.setItem(recipeId, JSON.stringify({
       recipeTitle,
       cookingRecipe,
       videoName: `${selectedVideo}.mp4`
-    };
-    localStorage.setItem(recipeId, JSON.stringify(qrRecipeData));
+    }));
 
     setShowPreview(true);
 
-    if (videoWindow && !videoWindow.closed) {
-      videoWindow.close();
-    }
+    let popup = videoWindow;
 
-    const popup = window.open("", "VideoWindow", `width=800,height=800`);
-    if (popup) {
-      popup.document.write(`
-        <html>
-          <head><title>Kisson Video</title></head>
-          <body style="margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;">
-            <video 
-              src="/videos/${selectedVideo}.mp4" 
-              autoplay 
-              loop 
-              muted 
-              style="max-width:100%;max-height:100%;" 
-            ></video>
-          </body>
-        </html>
-      `);
+    if (!popup || popup.closed) {
+      popup = window.open("", "VideoWindow", `width=800,height=800`);
       setVideoWindow(popup);
+    }
+    
+    if (popup) {
+      popup.document.body.innerHTML = `
+        <video 
+          src="/videos/${selectedVideo}.mp4" 
+          autoplay 
+          loop 
+          muted 
+          style="margin:0;max-width:100%;max-height:100%;display:flex;justify-content:center;align-items:center;height:100vh;background:#000" 
+        ></video>
+      `;
+      
     }
 
     setTimeout(() => setIsSubmitting(false), 3000);
